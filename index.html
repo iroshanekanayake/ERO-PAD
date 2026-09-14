@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ERO PAD OS v2.25 PWA</title>
+<style>
+    :root {
+        --bg: #0e0f13;
+        --panel: #171922;
+        --panel2: #1e212c;
+        --border: #2a2d3a;
+        --accent: #6fb3ff;
+        --accent2: #ffb347;
+        --accent-grad: linear-gradient(135deg, #6fb3ff, #9ecfff);
+        --blue: #3ea6ff;
+        --green: #33d17a;
+        --red: #ff5c5c;
+        --purple: #a86bff;
+        --text: #eef0f5;
+        --text-dim: #8b8fa3;
+    }
+    * { box-sizing: border-box; }
+    body {
+        font-family: 'Segoe UI', system-ui, Arial, sans-serif;
+        background: radial-gradient(circle at top, #191b24 0%, #0b0c10 70%);
+        color: var(--text);
+        margin: 0;
+        padding: 0;
+        min-height: 100vh;
+    }
+    .app { max-width: 720px; margin: 0 auto; padding: 18px 16px 40px; }
+    .hero { text-align: center; padding: 22px 10px 18px; }
+    .hero h1 {
+        margin: 0; font-size: 26px; font-weight: 800; letter-spacing: 0.5px;
+        background: var(--accent-grad); -webkit-background-clip: text; background-clip: text; color: transparent;
+    }
+    .hero p { margin: 4px 0 0; color: var(--text-dim); font-size: 13px; }
+
+    .tabs {
+        display: flex; gap: 6px; background: var(--panel); border: 1px solid var(--border);
+        border-radius: 14px; padding: 6px; margin-bottom: 18px; overflow-x: auto;
+    }
+    .tab-btn {
+        flex: 1 0 auto; white-space: nowrap; background: transparent; color: var(--text-dim);
+        border: none; padding: 10px 12px; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; transition: 0.2s;
+    }
+    .tab-btn.active { background: var(--accent-grad); color: #1a1200; }
+    .tab-panel { display: none; animation: fadein 0.25s ease; }
+    .tab-panel.active { display: block; }
+    @keyframes fadein { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+    .card {
+        background: var(--panel); border: 1px solid var(--border); border-radius: 16px;
+        padding: 18px; margin-bottom: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+    }
+    .card h2 { font-size: 15px; margin: 0 0 14px; color: var(--accent2); display: flex; align-items: center; gap: 8px; }
+    .card h2 .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent-grad); display: inline-block; }
+
+    canvas { background: #0b0c10; border-radius: 12px; border: 1px solid var(--border); width: 100%; height: 130px; display: block; }
+
+    .btn {
+        background: var(--accent-grad); color: #1a1200; border: none; padding: 12px 18px;
+        font-size: 14px; font-weight: 700; border-radius: 10px; cursor: pointer; width: 100%; transition: 0.15s;
+    }
+    .btn:active { transform: scale(0.98); }
+    .btn-outline { background: transparent; color: var(--text); border: 1px solid var(--border); }
+    .btn-blue { background: var(--blue); color: #06202f; }
+    .btn-green { background: var(--green); color: #063017; }
+    .btn-purple { background: var(--purple); color: #1b0838; }
+    .btn-red { background: var(--red); color: #350404; }
+    .btn-sm { padding: 7px 10px; font-size: 12px; width: auto; border-radius: 8px; }
+
+    .file-input { display: none; }
+    .status { margin-top: 12px; font-weight: 600; font-size: 13px; text-align: center; min-height: 16px; }
+
+    .settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .field { display: flex; flex-direction: column; gap: 5px; }
+    .checkbox-field { flex-direction: row; align-items: center; gap: 8px; }
+    .checkbox-field label { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+    .checkbox-field input[type="checkbox"] { width: 18px; height: 18px; flex-shrink: 0; }
+    .field label { font-size: 11px; color: var(--text-dim); font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; }
+    .field input, .field select {
+        background: var(--panel2); border: 1px solid var(--border); color: var(--text);
+        padding: 9px 10px; border-radius: 9px; font-size: 14px; width: 100%;
+    }
+    .field input:focus, .field select:focus { outline: none; border-color: var(--accent); }
+
+    .pad-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .pad-card { background: var(--panel2); border: 1px solid var(--border); border-radius: 12px; padding: 12px; }
+    .pad-card h4 {
+        margin: 0 0 10px; font-size: 13px; color: var(--accent2);
+        border-bottom: 1px solid var(--border); padding-bottom: 6px;
+        display: flex; justify-content: space-between; align-items: center;
+    }
+    .layer-label { font-size: 10px; color: var(--blue); font-weight: 700; text-transform: uppercase; margin: 8px 0 4px; letter-spacing: 0.5px; }
+    .mini-row { display: flex; gap: 6px; margin-bottom: 6px; }
+    .mini-row .field { flex: 1; }
+    .mini-row input { padding: 6px 8px; font-size: 12px; }
+    .mini-row label { font-size: 9px; }
+
+    .file-row {
+        display: flex; align-items: center; justify-content: space-between;
+        background: var(--panel2); border: 1px solid var(--border);
+        border-radius: 10px; padding: 10px 12px; margin-bottom: 8px;
+    }
+    .file-row .fname { font-size: 13px; font-weight: 600; }
+    .file-row .fsize { font-size: 11px; color: var(--text-dim); margin-left: 8px; }
+    .file-empty { text-align: center; color: var(--text-dim); font-size: 13px; padding: 20px 0; }
+
+    .footer { text-align: center; font-size: 11px; color: var(--text-dim); margin-top: 20px; }
+</style>
+</head>
+<body>
+<div class="app">
+    <div class="hero">
+        <h1>ERO PAD OS</h1>
+        <p>v2.25 PWA — Fast External Web Manager</p>
+    </div>
+
+    <div style="margin-bottom:12px; text-align:center;">
+        <span id="connectionBadge" style="background:#ff5c5c; color:#fff; padding:4px 10px; border-radius:12px; font-size:11px; font-weight:bold;">Connecting to 192.168.4.1...</span>
+    </div>
+
+    <div class="tabs">
+        <button class="tab-btn active" onclick="showTab('dash')">Dashboard</button>
+        <button class="tab-btn" onclick="showTab('settings')">Settings</button>
+        <button class="tab-btn" onclick="showTab('sounds')">Sounds</button>
+        <button class="tab-btn" onclick="showTab('files')">Files</button>
+        <button class="tab-btn" onclick="showTab('backup')">Backup</button>
+    </div>
+
+    <!-- DASHBOARD TAB -->
+    <div id="tab-dash" class="tab-panel active">
+        <div class="card">
+            <h2><span class="dot"></span>Kit Chains (Live)</h2>
+            <div class="mini-row">
+                <div class="field"><label>Chain (1-8)</label><input type="number" inputmode="numeric" pattern="[0-9]*" id="chainNumSelector" min="1" max="8" value="1" onchange="loadChainForEditing()"></div>
+                <div class="field checkbox-field"><label><input type="checkbox" id="chainModeToggle" onchange="toggleChainMode()"> Chain Mode Active</label></div>
+            </div>
+            <div class="field"><label>Steps (kit numbers, comma-separated)</label><input type="text" inputmode="numeric" id="chainStepsInput" placeholder="1,5,12,20"></div>
+            <div style="margin-top:8px; display:flex; gap:8px;">
+                <button class="btn btn-outline" onclick="loadChainForEditing()">Reload</button>
+                <button class="btn btn-green" onclick="saveChainSteps()">Save Steps</button>
+            </div>
+            <div style="margin-top:14px; display:flex; gap:8px;">
+                <button class="btn btn-blue" style="flex:1;" onclick="chainStep(-1)">&#9664; Prev Kit</button>
+                <button class="btn btn-blue" style="flex:1;" onclick="chainStep(1)">Next Kit &#9654;</button>
+            </div>
+            <div id="chainStatus" class="status"></div>
+        </div>
+        <div class="card">
+            <h2><span class="dot"></span>Live Piezo Visualizer</h2>
+            <canvas id="visCanvas"></canvas>
+        </div>
+    </div>
+
+    <!-- SETTINGS TAB -->
+    <div id="tab-settings" class="tab-panel">
+        <div class="card">
+            <h2><span class="dot"></span>Pad Calibration</h2>
+            <div class="pad-grid" id="calibration-container"></div>
+        </div>
+        <div class="card">
+            <h2><span class="dot"></span>System Settings</h2>
+            <div class="settings-grid">
+                <div class="field"><label>Master Volume %</label><input type="number" inputmode="numeric" pattern="[0-9]*" id="s_masterVolume" min="0" max="100"></div>
+                <div class="field"><label>Fixed MIDI Velocity</label><input type="number" inputmode="numeric" pattern="[0-9]*" id="s_fixedVelocity" min="1" max="127"></div>
+                <div class="field checkbox-field"><label><input type="checkbox" id="s_dynamicVelocity"> Dynamic Velocity</label></div>
+                <div class="field"><label>System Mode</label>
+                    <select id="s_systemMode">
+                        <option value="0">Sampler (SD)</option>
+                        <option value="1">MIDI Out (USB)</option>
+                        <option value="2">Hybrid</option>
+                    </select>
+                </div>
+                <div class="field"><label>Pad Layout</label>
+                    <select id="s_padCount"><option value="8">8 Pads</option><option value="10">10 Pads</option></select>
+                </div>
+            </div>
+            <div style="margin-top:14px;"><button class="btn" onclick="saveSettings()">Save System Settings</button></div>
+            <div id="settingsStatus" class="status"></div>
+        </div>
+        <div class="card">
+            <h2><span class="dot"></span>Crosstalk Matrix</h2>
+            <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin:12px 0;">
+                <label style="font-size:12px; color:var(--text-dim);">QUICK SET (30-100%)</label>
+                <input type="number" inputmode="numeric" pattern="[0-9]*" id="ctmQuickValue" min="30" max="100" value="30" style="width:70px; text-align:center; background:#0b0c10; border:1px solid var(--border); border-radius:6px; color:var(--text); padding:8px 4px;">
+                <button class="btn" onclick="applyCrosstalkToAll()">Set All & Save</button>
+            </div>
+            <div id="matrix-container" style="overflow-x:auto;"></div>
+            <div style="margin-top:14px; display:flex; gap:10px;">
+                <button class="btn" onclick="saveCrosstalkMatrix()">Save Matrix</button>
+                <button class="btn btn-outline" onclick="resetCrosstalkMatrix()">Reset 30%</button>
+            </div>
+            <div id="matrixStatus" class="status"></div>
+        </div>
+    </div>
+
+    <!-- SOUNDS TAB -->
+    <div id="tab-sounds" class="tab-panel">
+        <div class="card">
+            <h2><span class="dot"></span>Kit Selector</h2>
+            <div class="mini-row">
+                <div class="field"><label>Kit Number (1-90)</label><input type="number" inputmode="numeric" pattern="[0-9]*" id="kitSelector" min="1" max="90" value="1"></div>
+                <button class="btn btn-blue" onclick="loadKitFromSelector()" style="align-self:flex-end;">Load Kit</button>
+            </div>
+            <div class="mini-row" style="margin-top:10px;">
+                <div class="field"><label>Kit Name</label><input type="text" id="kitNameInput" maxlength="11" placeholder="e.g. Congo, Dholki"></div>
+                <button class="btn btn-outline" onclick="saveKitName()" style="align-self:flex-end;">Save Name</button>
+            </div>
+            <div id="kitSelectorStatus" class="status"></div>
+        </div>
+
+        <div class="card">
+            <h2><span class="dot"></span>Upload WAV Sample</h2>
+            <form id="uploadForm">
+                <input class="file-input" type="file" id="file" name="file" accept=".wav" onchange="uploadFileBtn()">
+                <button type="button" class="btn btn-blue" onclick="document.getElementById('file').click()">Select WAV File</button>
+            </form>
+            <div id="uploadStatus" class="status" style="color:var(--text-dim);">No file uploading...</div>
+        </div>
+
+        <div class="card">
+            <h2><span class="dot"></span>Pad Sound Matrix</h2>
+            <div class="pad-grid" id="pads-container"></div>
+            <datalist id="sdToneList"></datalist>
+            <div style="margin-top:16px;"><button class="btn btn-green" onclick="saveAssignments()">Save All Assignments</button></div>
+            <div id="saveStatus" class="status"></div>
+        </div>
+    </div>
+
+    <!-- FILES TAB -->
+    <div id="tab-files" class="tab-panel">
+        <div class="card">
+            <h2><span class="dot"></span>SD Card Samples</h2>
+            <div style="margin-bottom:12px;"><button class="btn btn-outline" onclick="loadFileList()">Refresh List</button></div>
+            <div id="fileListContainer"><div class="file-empty">Loading...</div></div>
+            <div id="fileStatus" class="status"></div>
+        </div>
+    </div>
+
+    <!-- BACKUP TAB -->
+    <div id="tab-backup" class="tab-panel">
+        <div class="card">
+            <h2><span class="dot"></span>JSON Config Management</h2>
+            <button type="button" class="btn btn-blue" onclick="window.location.href=ESP_BASE+'/backup-json'">Download JSON Backup</button>
+            <div style="margin-top:12px;">
+                <input class="file-input" type="file" id="jsonFile" accept=".json" onchange="restoreJson()">
+                <button type="button" class="btn btn-purple" onclick="document.getElementById('jsonFile').click()">Restore JSON Config</button>
+            </div>
+            <div id="jsonStatus" class="status"></div>
+        </div>
+    </div>
+
+    <p class="footer">ERO Pad OS v2.25 — GitHub PWA Client</p>
+</div>
+
+<script>
+    const ESP_BASE = "http://192.168.4.1";
+
+    function updateBadge(connected) {
+        let b = document.getElementById('connectionBadge');
+        if (connected) { b.style.background = "#33d17a"; b.innerText = "Connected to ERO PAD (192.168.4.1)"; }
+        else { b.style.background = "#ff5c5c"; b.innerText = "Disconnected! Check Wi-Fi connection."; }
+    }
+
+    function showTab(name) {
+        document.querySelectorAll('.tab-panel').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+        document.getElementById('tab-' + name).classList.add('active');
+        event.currentTarget.classList.add('active');
+        if (name === 'files') loadFileList();
+        if (name === 'sounds') populateSdToneList();
+    }
+
+    let calContainer = document.getElementById('calibration-container');
+    for (let i = 1; i <= 10; i++) {
+        calContainer.innerHTML += `
+            <div class="pad-card">
+                <h4>PAD ${i}</h4>
+                <div class="mini-row">
+                    <div class="field"><label>Threshold</label><input type="number" inputmode="numeric" pattern="[0-9]*" id="p${i}th" min="200" max="2000"></div>
+                    <div class="field"><label>Debounce ms</label><input type="number" inputmode="numeric" pattern="[0-9]*" id="p${i}db" min="10" max="300"></div>
+                </div>
+                <div class="mini-row">
+                    <div class="field"><label>Peak Win ms</label><input type="number" inputmode="numeric" pattern="[0-9]*" id="p${i}pw" min="2" max="30"></div>
+                    <div class="field"><label>Crosstalk ms</label><input type="number" inputmode="numeric" pattern="[0-9]*" id="p${i}ct" min="5" max="150"></div>
+                </div>
+            </div>
+        `;
+    }
+
+    let container = document.getElementById('pads-container');
+    for (let i = 1; i <= 10; i++) {
+        container.innerHTML += `
+            <div class="pad-card">
+                <h4>PAD ${i}</h4>
+                <div class="layer-label">Layer A</div>
+                <div class="mini-row">
+                    <div class="field"><label>Tone #</label><input type="number" inputmode="numeric" pattern="[0-9]*" id="p${i}a" min="0" max="2000" placeholder="0" list="sdToneList" onchange="previewToneFromPad(${i}, 'a')"></div>
+                    <div class="field"><label>Vol %</label><input type="number" inputmode="numeric" pattern="[0-9]*" id="p${i}va" min="0" max="100" placeholder="100"></div>
+                    <div class="field"><label>Filt</label><input type="number" inputmode="numeric" id="p${i}fa" min="-50" max="50" placeholder="0" onchange="previewToneFromPad(${i}, 'a')"></div>
+                </div>
+                <div class="layer-label">Layer B</div>
+                <div class="mini-row">
+                    <div class="field"><label>Tone #</label><input type="number" inputmode="numeric" pattern="[0-9]*" id="p${i}b" min="0" max="2000" placeholder="0" list="sdToneList" onchange="previewToneFromPad(${i}, 'b')"></div>
+                    <div class="field"><label>Vol %</label><input type="number" inputmode="numeric" pattern="[0-9]*" id="p${i}vb" min="0" max="100" placeholder="100"></div>
+                    <div class="field"><label>Filt</label><input type="number" inputmode="numeric" id="p${i}fb" min="-50" max="50" placeholder="0" onchange="previewToneFromPad(${i}, 'b')"></div>
+                </div>
+            </div>
+        `;
+    }
+
+    let ws;
+    function connectWS() {
+        ws = new WebSocket(`ws://192.168.4.1/ws`);
+        ws.onopen = () => updateBadge(true);
+        ws.onclose = () => { updateBadge(false); setTimeout(connectWS, 2000); };
+        ws.onerror = () => updateBadge(false);
+        ws.onmessage = function(event) {
+            let data = JSON.parse(event.data);
+            if (data.type === "PAD_HIT") { padPeaks[data.pad] = data.peak; padTriggers[data.pad] = 10; }
+        };
+    }
+    connectWS();
+
+    let padPeaks = new Array(10).fill(0);
+    let padTriggers = new Array(10).fill(0);
+    let canvas = document.getElementById('visCanvas');
+    let ctx = canvas.getContext('2d');
+    function renderVisualizer() {
+        canvas.width = canvas.clientWidth; canvas.height = canvas.clientHeight;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        let barWidth = (canvas.width / 10) - 6;
+        for (let i = 0; i < 10; i++) {
+            let x = i * (barWidth + 6) + 3;
+            let h = (padPeaks[i] / 4095) * (canvas.height - 30);
+            let y = canvas.height - h - 20;
+            ctx.fillStyle = padTriggers[i] > 0 ? "#ff7a1a" : "#3ea6ff";
+            ctx.fillRect(x, y, barWidth, h);
+            if (padPeaks[i] > 0) padPeaks[i] = Math.max(0, padPeaks[i] - 150);
+            if (padTriggers[i] > 0) padTriggers[i]--;
+            ctx.fillStyle = "#8b8fa3"; ctx.font = "10px Arial";
+            ctx.fillText("P" + (i + 1), x + (barWidth / 4), canvas.height - 5);
+        }
+        requestAnimationFrame(renderVisualizer);
+    }
+    renderVisualizer();
+
+    function populateSdToneList() {
+        fetch(ESP_BASE + '/list-files').then(r => r.json()).then(data => {
+            let dl = document.getElementById('sdToneList');
+            dl.innerHTML = '';
+            (data.files || []).forEach(f => {
+                let m = f.name.match(/(\d+)\.WAV$/i);
+                if (!m) return;
+                let opt = document.createElement('option');
+                opt.value = parseInt(m[1], 10);
+                opt.label = f.name;
+                dl.appendChild(opt);
+            });
+        }).catch(() => {});
+    }
+
+    function loadKitFromSelector() {
+        let kitNum = parseInt(document.getElementById('kitSelector').value, 10);
+        if (!kitNum || kitNum < 1 || kitNum > 90) return;
+        let status = document.getElementById('kitSelectorStatus');
+        status.innerHTML = 'Loading Kit ' + kitNum + '...'; status.style.color = '#ffb347';
+        fetch(ESP_BASE + '/select-kit?kit=' + kitNum).then(r => r.text()).then(() => {
+            status.innerHTML = 'Kit ' + kitNum + ' loaded.'; status.style.color = '#33d17a';
+            fetchAssignmentsForCurrentKit();
+            fetchKitNameForSelector();
+        }).catch(() => { status.innerHTML = 'Failed to switch kit.'; status.style.color = '#ff5c5c'; });
+    }
+
+    function fetchKitNameForSelector() {
+        let kitNum = parseInt(document.getElementById('kitSelector').value, 10) || 1;
+        fetch(ESP_BASE + '/get-kit-name?kit=' + kitNum).then(r => r.text()).then(name => {
+            document.getElementById('kitNameInput').value = name;
+        });
+    }
+
+    function saveKitName() {
+        let kitNum = parseInt(document.getElementById('kitSelector').value, 10) || 1;
+        let name = document.getElementById('kitNameInput').value.trim();
+        let status = document.getElementById('kitSelectorStatus');
+        fetch(ESP_BASE + '/save-kit-name?kit=' + kitNum + '&name=' + encodeURIComponent(name)).then(r => r.text()).then(() => {
+            status.innerHTML = name ? `Kit ${kitNum} renamed.` : `Kit ${kitNum} name cleared.`;
+            status.style.color = '#33d17a';
+        });
+    }
+
+    function fetchAssignmentsForCurrentKit() {
+        let kitNum = parseInt(document.getElementById('kitSelector').value, 10) || 1;
+        fetch(ESP_BASE + '/get-assignments?kit=' + kitNum).then(r => r.json()).then(data => {
+            for (let i = 1; i <= 10; i++) {
+                document.getElementById(`p${i}a`).value = data[`p${i}a`] || 0;
+                document.getElementById(`p${i}b`).value = data[`p${i}b`] || 0;
+                document.getElementById(`p${i}va`).value = data[`p${i}va`] ?? 100;
+                document.getElementById(`p${i}vb`).value = data[`p${i}vb`] ?? 100;
+                document.getElementById(`p${i}fa`).value = data[`p${i}fa`] ?? 0;
+                document.getElementById(`p${i}fb`).value = data[`p${i}fb`] ?? 0;
+            }
+        });
+    }
+
+    function loadChainForEditing() {
+        let n = parseInt(document.getElementById('chainNumSelector').value, 10) || 1;
+        fetch(ESP_BASE + '/get-chain?chain=' + n).then(r => r.json()).then(data => {
+            document.getElementById('chainStepsInput').value = (data.steps || []).filter(v => v > 0).join(',');
+        });
+    }
+
+    function saveChainSteps() {
+        let n = parseInt(document.getElementById('chainNumSelector').value, 10) || 1;
+        let raw = document.getElementById('chainStepsInput').value.trim();
+        let steps = raw.length ? raw.split(',').map(s => parseInt(s.trim(), 10)).filter(v => !isNaN(v) && v > 0) : [];
+        fetch(ESP_BASE + '/save-chain?chain=' + n + '&steps=' + steps.join(',')).then(r => r.text()).then(() => {
+            document.getElementById('chainStatus').innerText = 'Chain saved!';
+        });
+    }
+
+    function toggleChainMode() {
+        let on = document.getElementById('chainModeToggle').checked;
+        let n = parseInt(document.getElementById('chainNumSelector').value, 10) || 1;
+        fetch(ESP_BASE + '/set-chain-mode?on=' + (on ? 1 : 0) + '&chain=' + n);
+    }
+
+    function chainStep(dir) {
+        fetch(ESP_BASE + '/chain-step?dir=' + dir).then(r => r.text()).then(kit => {
+            document.getElementById('chainStatus').innerText = 'Now playing Kit ' + kit;
+        });
+    }
+
+    window.onload = function() {
+        populateSdToneList();
+        fetch(ESP_BASE + '/get-chain-mode').then(r => r.json()).then(data => {
+            document.getElementById('chainModeToggle').checked = !!data.active;
+            document.getElementById('chainNumSelector').value = data.chain;
+            loadChainForEditing();
+        });
+        fetch(ESP_BASE + '/get-current-kit').then(r => r.text()).then(k => {
+            document.getElementById('kitSelector').value = k;
+            fetchAssignmentsForCurrentKit();
+            fetchKitNameForSelector();
+        });
+        fetch(ESP_BASE + '/get-settings').then(r => r.json()).then(data => {
+            for (let i = 1; i <= 10; i++) {
+                document.getElementById(`p${i}th`).value = data.padThreshold?.[i - 1] ?? 600;
+                document.getElementById(`p${i}db`).value = data.padDebounceMs?.[i - 1] ?? 100;
+                document.getElementById(`p${i}pw`).value = data.padPeakWindowMs?.[i - 1] ?? 10;
+                document.getElementById(`p${i}ct`).value = data.padCrosstalkLockMs?.[i - 1] ?? 4;
+            }
+            document.getElementById('s_masterVolume').value = Math.round(data.masterVolume * 100);
+            document.getElementById('s_fixedVelocity').value = data.fixedVelocity;
+            document.getElementById('s_dynamicVelocity').checked = !!data.dynamicVelocity;
+            document.getElementById('s_systemMode').value = data.systemMode;
+            document.getElementById('s_padCount').value = data.padCount;
+            padCount = data.padCount;
+            loadCrosstalkMatrix();
+        });
+    };
+
+    let padCount = 8;
+    const MATRIX_DIM = 10;
+
+    function buildMatrixGrid(values) {
+        let n = padCount;
+        let html = '<table style="border-collapse:collapse; font-size:12px;"><tr><td></td>';
+        for (let c = 0; c < n; c++) html += `<td style="padding:4px; text-align:center; color:var(--text-dim);">P${c + 1}</td>`;
+        html += '</tr>';
+        for (let r = 0; r < n; r++) {
+            html += `<tr><td style="padding:4px; color:var(--text-dim);">P${r + 1}</td>`;
+            for (let c = 0; c < n; c++) {
+                if (r === c) {
+                    html += `<td style="padding:2px;"><input disabled value="—" style="width:42px; text-align:center; background:transparent; border:1px solid var(--border); border-radius:6px; color:var(--text-dim); padding:5px 2px;"></td>`;
+                } else {
+                    let v = values[r * MATRIX_DIM + c] ?? 30;
+                    html += `<td style="padding:2px;"><input type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="100" id="ctm_${r}_${c}" value="${v}" style="width:42px; text-align:center; background:#0b0c10; border:1px solid var(--border); border-radius:6px; color:var(--text); padding:5px 2px;"></td>`;
+                }
+            }
+            html += '</tr>';
+        }
+        html += '</table>';
+        document.getElementById('matrix-container').innerHTML = html;
+    }
+
+    function loadCrosstalkMatrix() {
+        fetch(ESP_BASE + '/get-crosstalk-matrix').then(r => r.json()).then(data => {
+            padCount = data.padCount || 8;
+            buildMatrixGrid(data.matrix || []);
+        });
+    }
+
+    function saveCrosstalkMatrix() {
+        let matrix = new Array(MATRIX_DIM * MATRIX_DIM).fill(0);
+        for (let r = 0; r < padCount; r++) {
+            for (let c = 0; c < padCount; c++) {
+                if (r === c) continue;
+                let el = document.getElementById(`ctm_${r}_${c}`);
+                matrix[r * MATRIX_DIM + c] = el ? parseInt(el.value) || 0 : 30;
+            }
+        }
+        fetch(ESP_BASE + '/save-crosstalk-matrix', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ matrix })
+        }).then(r => r.text()).then(() => {
+            document.getElementById('matrixStatus').innerText = "Matrix Saved!";
+        });
+    }
+
+    function resetCrosstalkMatrix() {
+        for (let r = 0; r < padCount; r++) {
+            for (let c = 0; c < padCount; c++) {
+                if (r === c) continue;
+                let el = document.getElementById(`ctm_${r}_${c}`);
+                if (el) el.value = 30;
+            }
+        }
+    }
+
+    function applyCrosstalkToAll() {
+        let v = parseInt(document.getElementById('ctmQuickValue').value);
+        if (isNaN(v)) v = 30;
+        for (let r = 0; r < padCount; r++) {
+            for (let c = 0; c < padCount; c++) {
+                if (r === c) continue;
+                let el = document.getElementById(`ctm_${r}_${c}`);
+                if (el) el.value = v;
+            }
+        }
+        saveCrosstalkMatrix();
+    }
+
+    let previewDebounceTimer = null;
+    let phoneAudio = new Audio();
+    function previewToneFromPad(padIndex, layer) {
+        clearTimeout(previewDebounceTimer);
+        previewDebounceTimer = setTimeout(() => {
+            let toneVal = document.getElementById(`p${padIndex}${layer}`).value;
+            let filtVal = document.getElementById(`p${padIndex}f${layer}`).value;
+            if (!toneVal || toneVal == 0) return;
+            fetch(ESP_BASE + `/preview-tone?tone=${toneVal}&filter=${filtVal || 0}`);
+            phoneAudio.pause();
+            phoneAudio.src = ESP_BASE + `/get-wav?tone=${toneVal}&t=${Date.now()}`;
+            phoneAudio.play().catch(() => {});
+        }, 250);
+    }
+
+    function saveSettings() {
+        let params = new URLSearchParams();
+        for (let i = 1; i <= 10; i++) {
+            params.append(`p${i}th`, document.getElementById(`p${i}th`).value);
+            params.append(`p${i}db`, document.getElementById(`p${i}db`).value);
+            params.append(`p${i}pw`, document.getElementById(`p${i}pw`).value);
+            params.append(`p${i}ct`, document.getElementById(`p${i}ct`).value);
+        }
+        params.append('masterVolume', (parseFloat(document.getElementById('s_masterVolume').value) / 100).toFixed(2));
+        params.append('fixedVelocity', document.getElementById('s_fixedVelocity').value);
+        params.append('dynamicVelocity', document.getElementById('s_dynamicVelocity').checked ? '1' : '0');
+        params.append('systemMode', document.getElementById('s_systemMode').value);
+        params.append('padCount', document.getElementById('s_padCount').value);
+        fetch(ESP_BASE + '/save-settings?' + params.toString()).then(r => r.text()).then(() => {
+            document.getElementById('settingsStatus').innerText = "Settings Saved!";
+        });
+    }
+
+    function uploadFileBtn() {
+        let fileInput = document.getElementById('file');
+        if (fileInput.files.length === 0) return;
+        let file = fileInput.files[0];
+        let formData = new FormData(); formData.append("file", file, file.name);
+        fetch(ESP_BASE + '/upload', { method: 'POST', body: formData }).then(r => r.text()).then(() => {
+            document.getElementById('uploadStatus').innerText = "Uploaded: " + file.name;
+        });
+    }
+
+    function saveAssignments() {
+        let kitNum = parseInt(document.getElementById('kitSelector').value, 10) || 1;
+        let params = new URLSearchParams();
+        params.append('kit', kitNum);
+        for (let i = 1; i <= 10; i++) {
+            params.append(`p${i}a`, document.getElementById(`p${i}a`).value);
+            params.append(`p${i}b`, document.getElementById(`p${i}b`).value);
+            params.append(`p${i}va`, document.getElementById(`p${i}va`).value);
+            params.append(`p${i}vb`, document.getElementById(`p${i}vb`).value);
+            params.append(`p${i}fa`, document.getElementById(`p${i}fa`).value);
+            params.append(`p${i}fb`, document.getElementById(`p${i}fb`).value);
+        }
+        fetch(ESP_BASE + '/save-assignments?' + params.toString()).then(r => r.text()).then(() => {
+            document.getElementById('saveStatus').innerText = "Saved!";
+        });
+    }
+
+    function loadFileList() {
+        let listEl = document.getElementById('fileListContainer');
+        fetch(ESP_BASE + '/list-files').then(r => r.json()).then(data => {
+            if (!data.files || data.files.length === 0) {
+                listEl.innerHTML = '<div class="file-empty">No files found.</div>';
+                return;
+            }
+            listEl.innerHTML = '';
+            data.files.forEach(f => {
+                let sizeKb = (f.size / 1024).toFixed(1);
+                let row = document.createElement('div');
+                row.className = 'file-row';
+                row.innerHTML = `<div><span class="fname">${f.name}</span><span class="fsize">${sizeKb} KB</span></div>
+                    <button class="btn btn-red btn-sm" onclick="deleteFile('${f.name}')">Delete</button>`;
+                listEl.appendChild(row);
+            });
+        });
+    }
+
+    function deleteFile(name) {
+        if (!confirm(`Delete ${name}?`)) return;
+        fetch(ESP_BASE + '/delete-file?name=' + encodeURIComponent(name)).then(r => r.text()).then(() => {
+            loadFileList();
+        });
+    }
+
+    function restoreJson() {
+        let fileInput = document.getElementById('jsonFile');
+        if (fileInput.files.length === 0) return;
+        let file = fileInput.files[0];
+        let formData = new FormData(); formData.append("file", file, file.name);
+        fetch(ESP_BASE + '/restore-json', { method: 'POST', body: formData }).then(r => r.text()).then(() => {
+            alert("Restored successfully!");
+        });
+    }
+</script>
+</body>
+</html>
+
