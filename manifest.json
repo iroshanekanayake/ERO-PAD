@@ -1,24 +1,35 @@
 {
   "name": "ERO PAD OS",
   "short_name": "ERO PAD",
-  "start_url": "./index.html",
+  "start_url": "./",
   "display": "standalone",
   "background_color": "#0e0f13",
   "theme_color": "#0e0f13",
   "orientation": "portrait",
   "icons": [
     {
-      "src": "icon-192.png",
+      "src": "./icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
-      "src": "icon-512.png",
+      "src": "./icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     }
-  ]
+  ],
+  "id": "./",
+  "description": "Wireless sound, pad settings and ESP32-S3 Octapad control center.",
+  "scope": "./",
+  "display_override": [
+    "standalone",
+    "minimal-ui"
+  ],
+  "categories": [
+    "music",
+    "utilities"
+  ],
+  "prefer_related_applications": false
 }
-

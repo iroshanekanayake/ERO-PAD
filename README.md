@@ -1,34 +1,41 @@
-# ERO PAD OS v2.24 — Connection Status Update
+# ERO PAD OS v2.25 — PWA & Connection Update
 
-## Package files
-- `ERO_PAD_OS_v2_24_COMPLETE_WEB_AND_OLED_UPDATE.ino` — complete ESP32-S3 firmware with the matching HTML embedded.
-- `index.html` — same updated HTML for GitHub Pages/source control.
-- `manifest.json`, `icon-192.png`, `icon-512.png` — existing PWA metadata and icons.
+## Package contents
+- `index.html` — complete web application and connection-status panel.
+- `ERO_PAD_OS_v2_24_COMPLETE_WEB_AND_OLED_UPDATE.ino` — ESP32-S3 firmware source with the exact same HTML embedded. Firmware logic/version remains v2.24.
+- `manifest.json` — corrected PWA manifest for the GitHub Pages `/ERO-PAD/` path.
+- `sw.js` — offline app-shell Service Worker, registered only on GitHub Pages.
+- `icon-192.png`, `icon-512.png` — application icons.
 - `README.md` — this guide.
 
-## Connection indicator
-The app distinguishes:
-- GitHub Pages preview: shows that the HTTPS GitHub page is not connected to the ESP32 control API and provides an Open ESP32 Control button.
-- ESP32 API: checks `/get-current-kit` every five seconds.
-- Live WebSocket: checks the `/ws` connection and reconnects automatically if it drops.
-- `ESP32 BOARD CONNECTED` appears only when both the API and WebSocket are connected.
+## PWA changes
+- Added the manifest link to the HTML.
+- Set relative `id`, `start_url`, and `scope` so the app works under the GitHub Pages project path.
+- Added Android/iOS web-app metadata and app icons.
+- Added a Service Worker that caches the application shell after the first online visit.
+- Added an Install ERO PAD button when Chrome emits `beforeinstallprompt`.
+- The Service Worker is registered only on HTTPS GitHub Pages; it is not registered on the ESP32 HTTP origin.
 
-A browser page cannot read the phone's Wi-Fi SSID. `PHONE ↔ BOARD: Board reachable` is based on a successful response from the ESP32, not direct access to Android Wi-Fi details.
+## Connection behavior
+- GitHub Pages shows `GITHUB PAGES PREVIEW`; it cannot directly control the ESP32 HTTP API because of browser HTTPS/mixed-content restrictions.
+- Use the ESP32 hotspot and open `http://192.168.4.1/` for hardware control.
+- On the ESP32 origin, the page checks the API and WebSocket and reports connected only when both are live.
+- The Service Worker does not cache ESP32 API routes.
 
-## Correct way to use the hardware controller
-1. Connect the phone's Wi-Fi to `ERO_PAD_WIFI` (password: `12345678`).
-2. If Android says the network has no internet, stay connected to it.
-3. Open `http://192.168.4.1/` in Chrome. This loads the HTML from the ESP32 itself, so relative API requests and the WebSocket use the correct local origin.
-4. Wait for both API and WebSocket to report connected.
+## Upload to GitHub
+Upload/replace the files in the repository root:
+`index.html`, `manifest.json`, `sw.js`, `icon-192.png`, `icon-512.png`, and the `.ino` source. Keep the repository's existing public Pages deployment settings.
 
-## GitHub Pages limitation
-GitHub Pages is HTTPS, while the ESP32 web server is HTTP. Modern browsers block an HTTPS page from calling the ESP32's HTTP API/WebSocket as mixed content. The GitHub Pages copy is therefore a preview/source copy; it cannot directly control the board. Use `http://192.168.4.1/` for hardware control.
+## Test after deployment
+1. Open `https://iroshanekanayake.github.io/ERO-PAD/` in Chrome.
+2. Reload once after the GitHub Pages deployment completes.
+3. Open Chrome menu → Install app / Add to Home screen, or use the in-page Install ERO PAD button if it appears.
+4. Open the installed app once while online; then test its shell offline.
+5. For hardware use, connect to the ESP32 hotspot and open `http://192.168.4.1/`.
 
-## Browser icon
-The HTML now includes an ERO PAD favicon. This changes the small site icon shown by Chrome; it is separate from the connection state shown inside the application.
-
-## Preserved features
-The existing tabs, Kit Chains, live Piezo Visualizer, Settings, Sound Manager, WAV upload, Files, Backup, calibration and Crosstalk Matrix controls are retained. The existing Crosstalk Level selector remains in the HTML.
-
-## Validation
-The HTML embedded in the `.ino` is byte-for-byte identical to `index.html`. JavaScript syntax and ZIP integrity are checked. Compile the firmware with the same ESP32-S3 board configuration and libraries before flashing. Hardware testing is still required.
+## Important limitations
+- A browser page cannot read the Android Wi-Fi SSID directly. The board-reachable state is inferred from successful ESP32 API access.
+- GitHub Pages is HTTPS and the ESP32 endpoint is HTTP. A GitHub Pages tab cannot directly call the ESP32 HTTP API/WebSocket. Use the ESP32-hosted page for actual hardware control.
+- Offline caching covers the application shell only. Live ESP32 functions, WAV transfers, settings saves, and other board API actions require the board connection.
+- The updated HTML embedded in the `.ino` is identical to the standalone `index.html`.
+- Firmware compilation and hardware testing must be performed with the project's original ESP32-S3 board configuration and libraries before flashing.
