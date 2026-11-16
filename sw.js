@@ -1,4 +1,4 @@
-const CACHE_NAME = "ero-pad-os-shell-v225";
+const CACHE_NAME = "ero-pad-os-shell-v2";
 const APP_SHELL = [
   "./",
   "./index.html",
