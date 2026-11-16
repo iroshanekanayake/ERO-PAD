@@ -2,17 +2,7 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ERO PAD OS v2.25 PWA</title>
-
-<!-- PWA & Mobile App Metadata -->
-<link rel="manifest" href="manifest.json">
-<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
-<link rel="apple-touch-icon" href="icon-512.png">
-<meta name="theme-color" content="#0e0f13">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="ERO PAD">
-
+<title>ERO PAD OS v2.24</title>
 <style>
     :root {
         --bg: #0e0f13;
@@ -39,41 +29,92 @@
         min-height: 100vh;
     }
     .app { max-width: 720px; margin: 0 auto; padding: 18px 16px 40px; }
-    .hero { text-align: center; padding: 22px 10px 18px; }
+    .hero {
+        text-align: center;
+        padding: 22px 10px 18px;
+    }
     .hero h1 {
-        margin: 0; font-size: 26px; font-weight: 800; letter-spacing: 0.5px;
-        background: var(--accent-grad); -webkit-background-clip: text; background-clip: text; color: transparent;
+        margin: 0;
+        font-size: 26px;
+        font-weight: 800;
+        letter-spacing: 0.5px;
+        background: var(--accent-grad);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
     }
     .hero p { margin: 4px 0 0; color: var(--text-dim); font-size: 13px; }
 
     .tabs {
-        display: flex; gap: 6px; background: var(--panel); border: 1px solid var(--border);
-        border-radius: 14px; padding: 6px; margin-bottom: 18px; overflow-x: auto;
+        display: flex;
+        gap: 6px;
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 6px;
+        margin-bottom: 18px;
+        overflow-x: auto;
     }
     .tab-btn {
-        flex: 1 0 auto; white-space: nowrap; background: transparent; color: var(--text-dim);
-        border: none; padding: 10px 12px; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; transition: 0.2s;
+        flex: 1 0 auto;
+        white-space: nowrap;
+        background: transparent;
+        color: var(--text-dim);
+        border: none;
+        padding: 10px 12px;
+        border-radius: 10px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: 0.2s;
     }
-    .tab-btn.active { background: var(--accent-grad); color: #1a1200; }
+    .tab-btn.active {
+        background: var(--accent-grad);
+        color: #1a1200;
+    }
+
     .tab-panel { display: none; animation: fadein 0.25s ease; }
     .tab-panel.active { display: block; }
     @keyframes fadein { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
 
     .card {
-        background: var(--panel); border: 1px solid var(--border); border-radius: 16px;
-        padding: 18px; margin-bottom: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 18px;
+        margin-bottom: 16px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.25);
     }
-    .card h2 { font-size: 15px; margin: 0 0 14px; color: var(--accent2); display: flex; align-items: center; gap: 8px; }
+    .card h2 {
+        font-size: 15px;
+        margin: 0 0 14px;
+        color: var(--accent2);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
     .card h2 .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent-grad); display: inline-block; }
 
     canvas { background: #0b0c10; border-radius: 12px; border: 1px solid var(--border); width: 100%; height: 130px; display: block; }
 
     .btn {
-        background: var(--accent-grad); color: #1a1200; border: none; padding: 12px 18px;
-        font-size: 14px; font-weight: 700; border-radius: 10px; cursor: pointer; width: 100%; transition: 0.15s;
+        background: var(--accent-grad);
+        color: #1a1200;
+        border: none;
+        padding: 12px 18px;
+        font-size: 14px;
+        font-weight: 700;
+        border-radius: 10px;
+        cursor: pointer;
+        width: 100%;
+        transition: 0.15s;
     }
     .btn:active { transform: scale(0.98); }
-    .btn-outline { background: transparent; color: var(--text); border: 1px solid var(--border); }
+    .btn-outline {
+        background: transparent;
+        color: var(--text);
+        border: 1px solid var(--border);
+    }
     .btn-blue { background: var(--blue); color: #06202f; }
     .btn-green { background: var(--green); color: #063017; }
     .btn-purple { background: var(--purple); color: #1b0838; }
@@ -90,8 +131,13 @@
     .checkbox-field input[type="checkbox"] { width: 18px; height: 18px; flex-shrink: 0; }
     .field label { font-size: 11px; color: var(--text-dim); font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; }
     .field input, .field select {
-        background: var(--panel2); border: 1px solid var(--border); color: var(--text);
-        padding: 9px 10px; border-radius: 9px; font-size: 14px; width: 100%;
+        background: var(--panel2);
+        border: 1px solid var(--border);
+        color: var(--text);
+        padding: 9px 10px;
+        border-radius: 9px;
+        font-size: 14px;
+        width: 100%;
     }
     .field input:focus, .field select:focus { outline: none; border-color: var(--accent); }
 
@@ -124,11 +170,7 @@
 <div class="app">
     <div class="hero">
         <h1>ERO PAD OS</h1>
-        <p>v2.25 PWA — Fast External Web Manager</p>
-    </div>
-
-    <div style="margin-bottom:12px; text-align:center;">
-        <span id="connectionBadge" style="background:#ff5c5c; color:#fff; padding:4px 10px; border-radius:12px; font-size:11px; font-weight:bold;">Connecting to 192.168.4.1...</span>
+        <p>v2.24 — Wireless Sound & Settings Center</p>
     </div>
 
     <div class="tabs">
@@ -143,11 +185,12 @@
     <div id="tab-dash" class="tab-panel active">
         <div class="card">
             <h2><span class="dot"></span>Kit Chains (Live)</h2>
+            <p style="font-size:12px; color:var(--text-dim); margin-top:-6px;">Step through a saved kit playlist -- works like a wireless footswitch. When Chain Mode is active, the hardware Kit Up/Down buttons step the chain too, instead of the raw kit number.</p>
             <div class="mini-row">
                 <div class="field"><label>Chain (1-8)</label><input type="number" inputmode="numeric" pattern="[0-9]*" id="chainNumSelector" min="1" max="8" value="1" onchange="loadChainForEditing()"></div>
                 <div class="field checkbox-field"><label><input type="checkbox" id="chainModeToggle" onchange="toggleChainMode()"> Chain Mode Active</label></div>
             </div>
-            <div class="field"><label>Steps (kit numbers, comma-separated)</label><input type="text" inputmode="numeric" id="chainStepsInput" placeholder="1,5,12,20"></div>
+            <div class="field"><label>Steps (kit numbers, in order, comma-separated)</label><input type="text" inputmode="numeric" id="chainStepsInput" placeholder="1,5,12,20"></div>
             <div style="margin-top:8px; display:flex; gap:8px;">
                 <button class="btn btn-outline" onclick="loadChainForEditing()">Reload</button>
                 <button class="btn btn-green" onclick="saveChainSteps()">Save Steps</button>
@@ -167,7 +210,8 @@
     <!-- SETTINGS TAB -->
     <div id="tab-settings" class="tab-panel">
         <div class="card">
-            <h2><span class="dot"></span>Pad Calibration</h2>
+            <h2><span class="dot"></span>Pad Calibration (per-pad)</h2>
+            <p style="font-size:12px; color:var(--text-dim); margin-top:-6px;">Threshold, Debounce, Peak Window and Crosstalk Lock are all tunable per pad — helpful for roll/bounce technique on some pads and crosstalk isolation on others.</p>
             <div class="pad-grid" id="calibration-container"></div>
         </div>
         <div class="card">
@@ -175,7 +219,7 @@
             <div class="settings-grid">
                 <div class="field"><label>Master Volume %</label><input type="number" inputmode="numeric" pattern="[0-9]*" id="s_masterVolume" min="0" max="100"></div>
                 <div class="field"><label>Fixed MIDI Velocity</label><input type="number" inputmode="numeric" pattern="[0-9]*" id="s_fixedVelocity" min="1" max="127"></div>
-                <div class="field checkbox-field"><label><input type="checkbox" id="s_dynamicVelocity"> Dynamic Velocity</label></div>
+                <div class="field checkbox-field"><label><input type="checkbox" id="s_dynamicVelocity"> Dynamic Velocity (peak-driven, ignores the fixed number above)</label></div>
                 <div class="field"><label>System Mode</label>
                     <select id="s_systemMode">
                         <option value="0">Sampler (SD)</option>
@@ -191,16 +235,40 @@
             <div id="settingsStatus" class="status"></div>
         </div>
         <div class="card">
-            <h2><span class="dot"></span>Crosstalk Matrix</h2>
+            <h2><span class="dot"></span>Crosstalk Matrix (Trigger Engine)</h2>
+            <p style="font-size:12px; color:var(--text-dim); margin-top:-6px;">Row = the pad being checked, column = the other pad it's compared against. Value = how big a % of the column pad's peak this row pad needs to reach, within its Crosstalk Lock window, to count as a genuine hit instead of bleed-through. 0 = never reject (use for pads that never bleed into each other on your hardware). Hit pads one at a time and watch the Live Visualizer on the Dashboard tab to find which pairs actually bleed -- distance on the pad layout does NOT reliably predict this on a rigid/plastic base.</p>
+            <div class="card" style="background:var(--panel2); margin:14px 0; padding:14px;">
+                <h3 style="margin:0 0 8px; color:var(--accent); font-size:14px;">Roland-Style Crosstalk Cancel Level</h3>
+                <p style="font-size:12px; color:var(--text-dim); margin:0 0 12px;">Choose one pad and apply a 50%, 60%, 70% or 80% level to that pad's matrix row. This matches the OLED Crosstalk Level control. Other pads' rows are not changed.</p>
+                <div class="settings-grid" style="align-items:end;">
+                    <div class="field">
+                        <label for="ctLevelPad">Select Pad</label>
+                        <select id="ctLevelPad"></select>
+                    </div>
+                    <div class="field">
+                        <label for="ctLevelValue">Crosstalk Level</label>
+                        <select id="ctLevelValue">
+                            <option value="50">50%</option>
+                            <option value="60">60%</option>
+                            <option value="70">70%</option>
+                            <option value="80">80%</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="margin-top:12px;">
+                    <button class="btn btn-blue" onclick="applyCrosstalkLevelToSelectedPad()">Apply Level to Selected Pad & Save</button>
+                </div>
+                <div id="ctLevelStatus" class="status"></div>
+            </div>
             <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin:12px 0;">
-                <label style="font-size:12px; color:var(--text-dim);">QUICK SET (30-100%)</label>
+                <label style="font-size:12px; color:var(--text-dim);">QUICK SET (30-100%, applies to every box below)</label>
                 <input type="number" inputmode="numeric" pattern="[0-9]*" id="ctmQuickValue" min="30" max="100" value="30" style="width:70px; text-align:center; background:#0b0c10; border:1px solid var(--border); border-radius:6px; color:var(--text); padding:8px 4px;">
-                <button class="btn" onclick="applyCrosstalkToAll()">Set All & Save</button>
+                <button class="btn" onclick="applyCrosstalkToAll()">Set All Pads & Save</button>
             </div>
             <div id="matrix-container" style="overflow-x:auto;"></div>
-            <div style="margin-top:14px; display:flex; gap:10px;">
-                <button class="btn" onclick="saveCrosstalkMatrix()">Save Matrix</button>
-                <button class="btn btn-outline" onclick="resetCrosstalkMatrix()">Reset 30%</button>
+            <div style="margin-top:14px; display:flex; gap:10px; flex-wrap:wrap;">
+                <button class="btn" onclick="saveCrosstalkMatrix()">Save Crosstalk Matrix</button>
+                <button class="btn btn-outline" onclick="resetCrosstalkMatrix()">Reset All to 30%</button>
             </div>
             <div id="matrixStatus" class="status"></div>
         </div>
@@ -210,12 +278,13 @@
     <div id="tab-sounds" class="tab-panel">
         <div class="card">
             <h2><span class="dot"></span>Kit Selector</h2>
+            <p style="font-size:12px; color:var(--text-dim); margin-top:-6px;">The Pad Sound Matrix below always edits ONE kit -- whichever number is loaded here. This also switches the kit playing live on the device (same as pressing the hardware Kit Up/Down buttons).</p>
             <div class="mini-row">
                 <div class="field"><label>Kit Number (1-90)</label><input type="number" inputmode="numeric" pattern="[0-9]*" id="kitSelector" min="1" max="90" value="1"></div>
                 <button class="btn btn-blue" onclick="loadKitFromSelector()" style="align-self:flex-end;">Load Kit</button>
             </div>
             <div class="mini-row" style="margin-top:10px;">
-                <div class="field"><label>Kit Name</label><input type="text" id="kitNameInput" maxlength="11" placeholder="e.g. Congo, Dholki"></div>
+                <div class="field"><label>Kit Name (optional, max 11 chars)</label><input type="text" id="kitNameInput" maxlength="11" placeholder="e.g. Congo, Dholki, Bongo"></div>
                 <button class="btn btn-outline" onclick="saveKitName()" style="align-self:flex-end;">Save Name</button>
             </div>
             <div id="kitSelectorStatus" class="status"></div>
@@ -232,6 +301,7 @@
 
         <div class="card">
             <h2><span class="dot"></span>Pad Sound Matrix</h2>
+            <p style="font-size:12px; color:var(--text-dim); margin-top:-6px;">Tap a tone or filter field to hear it instantly on your phone. Tone fields show a pick-list of the WAV files actually on your SD card -- start typing or tap the field to see it.</p>
             <div class="pad-grid" id="pads-container"></div>
             <datalist id="sdToneList"></datalist>
             <div style="margin-top:16px;"><button class="btn btn-green" onclick="saveAssignments()">Save All Assignments</button></div>
@@ -253,7 +323,7 @@
     <div id="tab-backup" class="tab-panel">
         <div class="card">
             <h2><span class="dot"></span>JSON Config Management</h2>
-            <button type="button" class="btn btn-blue" onclick="window.location.href=ESP_BASE+'/backup-json'">Download JSON Backup</button>
+            <button type="button" class="btn btn-blue" onclick="window.location.href='/backup-json'">Download JSON Backup</button>
             <div style="margin-top:12px;">
                 <input class="file-input" type="file" id="jsonFile" accept=".json" onchange="restoreJson()">
                 <button type="button" class="btn btn-purple" onclick="document.getElementById('jsonFile').click()">Restore JSON Config</button>
@@ -262,18 +332,10 @@
         </div>
     </div>
 
-    <p class="footer">ERO Pad OS v2.25 — GitHub PWA Client</p>
+    <p class="footer">ERO Pad OS v2.24 — ESP32-S3 Wireless Engine</p>
 </div>
 
 <script>
-    const ESP_BASE = "http://192.168.4.1";
-
-    function updateBadge(connected) {
-        let b = document.getElementById('connectionBadge');
-        if (connected) { b.style.background = "#33d17a"; b.innerText = "Connected to ERO PAD (192.168.4.1)"; }
-        else { b.style.background = "#ff5c5c"; b.innerText = "Disconnected! Check Wi-Fi connection."; }
-    }
-
     function showTab(name) {
         document.querySelectorAll('.tab-panel').forEach(el => el.classList.remove('active'));
         document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
@@ -307,13 +369,13 @@
                 <h4>PAD ${i}</h4>
                 <div class="layer-label">Layer A</div>
                 <div class="mini-row">
-                    <div class="field"><label>Tone #</label><input type="number" inputmode="numeric" pattern="[0-9]*" id="p${i}a" min="0" max="2000" placeholder="0" list="sdToneList" onchange="previewToneFromPad(${i}, 'a')"></div>
+                    <div class="field"><label>Tone</label><input type="number" inputmode="numeric" pattern="[0-9]*" id="p${i}a" min="0" max="2000" placeholder="0" list="sdToneList" onchange="previewToneFromPad(${i}, 'a')"></div>
                     <div class="field"><label>Vol %</label><input type="number" inputmode="numeric" pattern="[0-9]*" id="p${i}va" min="0" max="100" placeholder="100"></div>
                     <div class="field"><label>Filt</label><input type="number" inputmode="numeric" id="p${i}fa" min="-50" max="50" placeholder="0" onchange="previewToneFromPad(${i}, 'a')"></div>
                 </div>
                 <div class="layer-label">Layer B</div>
                 <div class="mini-row">
-                    <div class="field"><label>Tone #</label><input type="number" inputmode="numeric" pattern="[0-9]*" id="p${i}b" min="0" max="2000" placeholder="0" list="sdToneList" onchange="previewToneFromPad(${i}, 'b')"></div>
+                    <div class="field"><label>Tone</label><input type="number" inputmode="numeric" pattern="[0-9]*" id="p${i}b" min="0" max="2000" placeholder="0" list="sdToneList" onchange="previewToneFromPad(${i}, 'b')"></div>
                     <div class="field"><label>Vol %</label><input type="number" inputmode="numeric" pattern="[0-9]*" id="p${i}vb" min="0" max="100" placeholder="100"></div>
                     <div class="field"><label>Filt</label><input type="number" inputmode="numeric" id="p${i}fb" min="-50" max="50" placeholder="0" onchange="previewToneFromPad(${i}, 'b')"></div>
                 </div>
@@ -321,21 +383,13 @@
         `;
     }
 
-    let ws;
-    function connectWS() {
-        ws = new WebSocket(`ws://192.168.4.1/ws`);
-        ws.onopen = () => updateBadge(true);
-        ws.onclose = () => { updateBadge(false); setTimeout(connectWS, 2000); };
-        ws.onerror = () => updateBadge(false);
-        ws.onmessage = function(event) {
-            let data = JSON.parse(event.data);
-            if (data.type === "PAD_HIT") { padPeaks[data.pad] = data.peak; padTriggers[data.pad] = 10; }
-        };
-    }
-    connectWS();
-
+    let ws = new WebSocket(`ws://${location.host}/ws`);
     let padPeaks = new Array(10).fill(0);
     let padTriggers = new Array(10).fill(0);
+    ws.onmessage = function(event) {
+        let data = JSON.parse(event.data);
+        if (data.type === "PAD_HIT") { padPeaks[data.pad] = data.peak; padTriggers[data.pad] = 10; }
+    };
     let canvas = document.getElementById('visCanvas');
     let ctx = canvas.getContext('2d');
     function renderVisualizer() {
@@ -358,7 +412,7 @@
     renderVisualizer();
 
     function populateSdToneList() {
-        fetch(ESP_BASE + '/list-files').then(r => r.json()).then(data => {
+        fetch('/list-files').then(r => r.json()).then(data => {
             let dl = document.getElementById('sdToneList');
             dl.innerHTML = '';
             (data.files || []).forEach(f => {
@@ -374,11 +428,11 @@
 
     function loadKitFromSelector() {
         let kitNum = parseInt(document.getElementById('kitSelector').value, 10);
-        if (!kitNum || kitNum < 1 || kitNum > 90) return;
+        if (!kitNum || kitNum < 1 || kitNum > 90) { alert('Enter a kit number between 1 and 90.'); return; }
         let status = document.getElementById('kitSelectorStatus');
         status.innerHTML = 'Loading Kit ' + kitNum + '...'; status.style.color = '#ffb347';
-        fetch(ESP_BASE + '/select-kit?kit=' + kitNum).then(r => r.text()).then(() => {
-            status.innerHTML = 'Kit ' + kitNum + ' loaded.'; status.style.color = '#33d17a';
+        fetch('/select-kit?kit=' + kitNum).then(r => r.text()).then(() => {
+            status.innerHTML = 'Kit ' + kitNum + ' loaded -- now editing this kit.'; status.style.color = '#33d17a';
             fetchAssignmentsForCurrentKit();
             fetchKitNameForSelector();
         }).catch(() => { status.innerHTML = 'Failed to switch kit.'; status.style.color = '#ff5c5c'; });
@@ -386,7 +440,7 @@
 
     function fetchKitNameForSelector() {
         let kitNum = parseInt(document.getElementById('kitSelector').value, 10) || 1;
-        fetch(ESP_BASE + '/get-kit-name?kit=' + kitNum).then(r => r.text()).then(name => {
+        fetch('/get-kit-name?kit=' + kitNum).then(r => r.text()).then(name => {
             document.getElementById('kitNameInput').value = name;
         });
     }
@@ -395,15 +449,16 @@
         let kitNum = parseInt(document.getElementById('kitSelector').value, 10) || 1;
         let name = document.getElementById('kitNameInput').value.trim();
         let status = document.getElementById('kitSelectorStatus');
-        fetch(ESP_BASE + '/save-kit-name?kit=' + kitNum + '&name=' + encodeURIComponent(name)).then(r => r.text()).then(() => {
-            status.innerHTML = name ? `Kit ${kitNum} renamed.` : `Kit ${kitNum} name cleared.`;
+        status.innerHTML = 'Saving name...'; status.style.color = '#ffb347';
+        fetch('/save-kit-name?kit=' + kitNum + '&name=' + encodeURIComponent(name)).then(r => r.text()).then(() => {
+            status.innerHTML = name ? `Kit ${kitNum} renamed to "${name}".` : `Kit ${kitNum} name cleared.`;
             status.style.color = '#33d17a';
-        });
+        }).catch(() => { status.innerHTML = 'Failed to save name.'; status.style.color = '#ff5c5c'; });
     }
 
     function fetchAssignmentsForCurrentKit() {
         let kitNum = parseInt(document.getElementById('kitSelector').value, 10) || 1;
-        fetch(ESP_BASE + '/get-assignments?kit=' + kitNum).then(r => r.json()).then(data => {
+        fetch('/get-assignments?kit=' + kitNum).then(r => r.json()).then(data => {
             for (let i = 1; i <= 10; i++) {
                 document.getElementById(`p${i}a`).value = data[`p${i}a`] || 0;
                 document.getElementById(`p${i}b`).value = data[`p${i}b`] || 0;
@@ -417,7 +472,7 @@
 
     function loadChainForEditing() {
         let n = parseInt(document.getElementById('chainNumSelector').value, 10) || 1;
-        fetch(ESP_BASE + '/get-chain?chain=' + n).then(r => r.json()).then(data => {
+        fetch('/get-chain?chain=' + n).then(r => r.json()).then(data => {
             document.getElementById('chainStepsInput').value = (data.steps || []).filter(v => v > 0).join(',');
         });
     }
@@ -426,36 +481,39 @@
         let n = parseInt(document.getElementById('chainNumSelector').value, 10) || 1;
         let raw = document.getElementById('chainStepsInput').value.trim();
         let steps = raw.length ? raw.split(',').map(s => parseInt(s.trim(), 10)).filter(v => !isNaN(v) && v > 0) : [];
-        fetch(ESP_BASE + '/save-chain?chain=' + n + '&steps=' + steps.join(',')).then(r => r.text()).then(() => {
-            document.getElementById('chainStatus').innerText = 'Chain saved!';
-        });
+        let status = document.getElementById('chainStatus');
+        status.innerHTML = 'Saving...'; status.style.color = '#ffb347';
+        fetch('/save-chain?chain=' + n + '&steps=' + steps.join(',')).then(r => r.text()).then(() => {
+            status.innerHTML = 'Chain ' + n + ' saved (' + steps.length + ' steps).'; status.style.color = '#33d17a';
+        }).catch(() => { status.innerHTML = 'Save failed.'; status.style.color = '#ff5c5c'; });
     }
 
     function toggleChainMode() {
         let on = document.getElementById('chainModeToggle').checked;
         let n = parseInt(document.getElementById('chainNumSelector').value, 10) || 1;
-        fetch(ESP_BASE + '/set-chain-mode?on=' + (on ? 1 : 0) + '&chain=' + n);
+        fetch('/set-chain-mode?on=' + (on ? 1 : 0) + '&chain=' + n);
     }
 
     function chainStep(dir) {
-        fetch(ESP_BASE + '/chain-step?dir=' + dir).then(r => r.text()).then(kit => {
-            document.getElementById('chainStatus').innerText = 'Now playing Kit ' + kit;
-        });
+        let status = document.getElementById('chainStatus');
+        fetch('/chain-step?dir=' + dir).then(r => r.text()).then(kit => {
+            status.innerHTML = 'Now playing Kit ' + kit + '.'; status.style.color = '#33d17a';
+        }).catch(() => { status.innerHTML = 'Step failed -- check connection.'; status.style.color = '#ff5c5c'; });
     }
 
     window.onload = function() {
         populateSdToneList();
-        fetch(ESP_BASE + '/get-chain-mode').then(r => r.json()).then(data => {
+        fetch('/get-chain-mode').then(r => r.json()).then(data => {
             document.getElementById('chainModeToggle').checked = !!data.active;
             document.getElementById('chainNumSelector').value = data.chain;
             loadChainForEditing();
         });
-        fetch(ESP_BASE + '/get-current-kit').then(r => r.text()).then(k => {
+        fetch('/get-current-kit').then(r => r.text()).then(k => {
             document.getElementById('kitSelector').value = k;
             fetchAssignmentsForCurrentKit();
             fetchKitNameForSelector();
         });
-        fetch(ESP_BASE + '/get-settings').then(r => r.json()).then(data => {
+        fetch('/get-settings').then(r => r.json()).then(data => {
             for (let i = 1; i <= 10; i++) {
                 document.getElementById(`p${i}th`).value = data.padThreshold?.[i - 1] ?? 600;
                 document.getElementById(`p${i}db`).value = data.padDebounceMs?.[i - 1] ?? 100;
@@ -475,8 +533,23 @@
     let padCount = 8;
     const MATRIX_DIM = 10;
 
+    function syncCrosstalkLevelPadOptions() {
+        const select = document.getElementById('ctLevelPad');
+        if (!select) return;
+        const previous = parseInt(select.value, 10) || 1;
+        select.innerHTML = '';
+        for (let i = 1; i <= padCount; i++) {
+            const option = document.createElement('option');
+            option.value = String(i);
+            option.textContent = 'PAD ' + i;
+            select.appendChild(option);
+        }
+        select.value = String(Math.min(previous, padCount));
+    }
+
     function buildMatrixGrid(values) {
         let n = padCount;
+        syncCrosstalkLevelPadOptions();
         let html = '<table style="border-collapse:collapse; font-size:12px;"><tr><td></td>';
         for (let c = 0; c < n; c++) html += `<td style="padding:4px; text-align:center; color:var(--text-dim);">P${c + 1}</td>`;
         html += '</tr>';
@@ -497,13 +570,13 @@
     }
 
     function loadCrosstalkMatrix() {
-        fetch(ESP_BASE + '/get-crosstalk-matrix').then(r => r.json()).then(data => {
+        fetch('/get-crosstalk-matrix').then(r => r.json()).then(data => {
             padCount = data.padCount || 8;
             buildMatrixGrid(data.matrix || []);
         });
     }
 
-    function saveCrosstalkMatrix() {
+    function saveCrosstalkMatrix(statusElementId = "matrixStatus") {
         let matrix = new Array(MATRIX_DIM * MATRIX_DIM).fill(0);
         for (let r = 0; r < padCount; r++) {
             for (let c = 0; c < padCount; c++) {
@@ -512,12 +585,42 @@
                 matrix[r * MATRIX_DIM + c] = el ? parseInt(el.value) || 0 : 30;
             }
         }
-        fetch(ESP_BASE + '/save-crosstalk-matrix', {
+        let status = document.getElementById(statusElementId);
+        if (status) { status.innerHTML = "Saving..."; status.style.color = "#ffb347"; }
+        fetch('/save-crosstalk-matrix', {
             method: 'POST', headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ matrix })
-        }).then(r => r.text()).then(() => {
-            document.getElementById('matrixStatus').innerText = "Matrix Saved!";
+        }).then(r => {
+            if (!r.ok) throw new Error("HTTP " + r.status);
+            return r.text();
+        }).then(() => {
+            if (status) { status.innerHTML = "Crosstalk Matrix Saved!"; status.style.color = "#33d17a"; }
+        }).catch(error => {
+            if (status) { status.innerHTML = "Save failed: " + error.message; status.style.color = "#ff5c5c"; }
         });
+    }
+
+    function applyCrosstalkLevelToSelectedPad() {
+        const pad = parseInt(document.getElementById('ctLevelPad').value, 10) - 1;
+        const level = parseInt(document.getElementById('ctLevelValue').value, 10);
+        const status = document.getElementById('ctLevelStatus');
+
+        if (!Number.isInteger(pad) || pad < 0 || pad >= padCount ||
+            ![50, 60, 70, 80].includes(level)) {
+            status.innerHTML = "Select a valid pad and level.";
+            status.style.color = "#ff5c5c";
+            return;
+        }
+
+        for (let other = 0; other < padCount; other++) {
+            if (other === pad) continue;
+            const cell = document.getElementById(`ctm_${pad}_${other}`);
+            if (cell) cell.value = level;
+        }
+
+        status.innerHTML = `Applying ${level}% to PAD ${pad + 1}...`;
+        status.style.color = "#ffb347";
+        saveCrosstalkMatrix("ctLevelStatus");
     }
 
     function resetCrosstalkMatrix() {
@@ -533,6 +636,7 @@
     function applyCrosstalkToAll() {
         let v = parseInt(document.getElementById('ctmQuickValue').value);
         if (isNaN(v)) v = 30;
+        v = Math.max(30, Math.min(100, v));
         for (let r = 0; r < padCount; r++) {
             for (let c = 0; c < padCount; c++) {
                 if (r === c) continue;
@@ -551,9 +655,9 @@
             let toneVal = document.getElementById(`p${padIndex}${layer}`).value;
             let filtVal = document.getElementById(`p${padIndex}f${layer}`).value;
             if (!toneVal || toneVal == 0) return;
-            fetch(ESP_BASE + `/preview-tone?tone=${toneVal}&filter=${filtVal || 0}`);
+            fetch(`/preview-tone?tone=${toneVal}&filter=${filtVal || 0}`);
             phoneAudio.pause();
-            phoneAudio.src = ESP_BASE + `/get-wav?tone=${toneVal}&t=${Date.now()}`;
+            phoneAudio.src = `/get-wav?tone=${toneVal}&t=${Date.now()}`;
             phoneAudio.play().catch(() => {});
         }, 250);
     }
@@ -571,8 +675,10 @@
         params.append('dynamicVelocity', document.getElementById('s_dynamicVelocity').checked ? '1' : '0');
         params.append('systemMode', document.getElementById('s_systemMode').value);
         params.append('padCount', document.getElementById('s_padCount').value);
-        fetch(ESP_BASE + '/save-settings?' + params.toString()).then(r => r.text()).then(() => {
-            document.getElementById('settingsStatus').innerText = "Settings Saved!";
+        let status = document.getElementById('settingsStatus');
+        status.innerHTML = "Saving..."; status.style.color = "#ffb347";
+        fetch('/save-settings?' + params.toString()).then(r => r.text()).then(() => {
+            status.innerHTML = "Settings Saved!"; status.style.color = "#33d17a";
         });
     }
 
@@ -581,9 +687,11 @@
         if (fileInput.files.length === 0) return;
         let file = fileInput.files[0];
         let formData = new FormData(); formData.append("file", file, file.name);
-        fetch(ESP_BASE + '/upload', { method: 'POST', body: formData }).then(r => r.text()).then(() => {
-            document.getElementById('uploadStatus').innerText = "Uploaded: " + file.name;
-        });
+        let status = document.getElementById('uploadStatus');
+        status.innerHTML = "Uploading " + file.name + "..."; status.style.color = "#ffb347";
+        fetch('/upload', { method: 'POST', body: formData }).then(r => r.text()).then(() => {
+            status.innerHTML = "Uploaded: " + file.name; status.style.color = "#33d17a";
+        }).catch(() => { status.innerHTML = "Upload Failed!"; status.style.color = "#ff5c5c"; });
     }
 
     function saveAssignments() {
@@ -598,19 +706,32 @@
             params.append(`p${i}fa`, document.getElementById(`p${i}fa`).value);
             params.append(`p${i}fb`, document.getElementById(`p${i}fb`).value);
         }
-        fetch(ESP_BASE + '/save-assignments?' + params.toString()).then(r => r.text()).then(() => {
-            document.getElementById('saveStatus').innerText = "Saved!";
+        let status = document.getElementById('saveStatus');
+        status.innerHTML = "Saving..."; status.style.color = "#ffb347";
+        fetch('/save-assignments?' + params.toString()).then(r => r.text()).then(() => {
+            status.innerHTML = "Saved! Pads updated instantly."; status.style.color = "#33d17a";
         });
     }
 
     function loadFileList() {
         let listEl = document.getElementById('fileListContainer');
-        fetch(ESP_BASE + '/list-files').then(r => r.json()).then(data => {
+        listEl.innerHTML = '<div class="file-empty">Loading...</div>';
+        let controller = new AbortController();
+        let timeoutId = setTimeout(() => controller.abort(), 8000);
+        fetch('/list-files', { signal: controller.signal }).then(r => r.json()).then(data => {
+            clearTimeout(timeoutId);
             if (!data.files || data.files.length === 0) {
-                listEl.innerHTML = '<div class="file-empty">No files found.</div>';
+                listEl.innerHTML = '<div class="file-empty">No sample files on SD card yet.</div>';
                 return;
             }
             listEl.innerHTML = '';
+            if (data.truncated) {
+                let notice = document.createElement('div');
+                notice.className = 'file-empty';
+                notice.style.color = '#ffb347';
+                notice.innerHTML = `Showing first ${data.shown} files -- more exist on the SD card but were left out to protect device memory. Use the Tone field's pick-list (Sounds tab) to reach tone numbers beyond this list.`;
+                listEl.appendChild(notice);
+            }
             data.files.forEach(f => {
                 let sizeKb = (f.size / 1024).toFixed(1);
                 let row = document.createElement('div');
@@ -619,12 +740,18 @@
                     <button class="btn btn-red btn-sm" onclick="deleteFile('${f.name}')">Delete</button>`;
                 listEl.appendChild(row);
             });
+        }).catch(() => {
+            clearTimeout(timeoutId);
+            listEl.innerHTML = '<div class="file-empty">Could not load file list -- the device may have restarted. <button class="btn btn-outline btn-sm" onclick="loadFileList()">Retry</button></div>';
         });
     }
 
     function deleteFile(name) {
-        if (!confirm(`Delete ${name}?`)) return;
-        fetch(ESP_BASE + '/delete-file?name=' + encodeURIComponent(name)).then(r => r.text()).then(() => {
+        if (!confirm(`Delete ${name} from the SD card? This cannot be undone.`)) return;
+        let status = document.getElementById('fileStatus');
+        status.innerHTML = "Deleting..."; status.style.color = "#ffb347";
+        fetch('/delete-file?name=' + encodeURIComponent(name)).then(r => r.text()).then(() => {
+            status.innerHTML = "Deleted " + name; status.style.color = "#33d17a";
             loadFileList();
         });
     }
@@ -634,11 +761,13 @@
         if (fileInput.files.length === 0) return;
         let file = fileInput.files[0];
         let formData = new FormData(); formData.append("file", file, file.name);
-        fetch(ESP_BASE + '/restore-json', { method: 'POST', body: formData }).then(r => r.text()).then(() => {
-            alert("Restored successfully!");
+        let status = document.getElementById('jsonStatus');
+        status.innerHTML = "Restoring..."; status.style.color = "#ffb347";
+        fetch('/restore-json', { method: 'POST', body: formData }).then(r => r.text()).then(() => {
+            status.innerHTML = "Restored! Reloading..."; status.style.color = "#33d17a";
+            setTimeout(() => location.reload(), 1000);
         });
     }
 </script>
 </body>
 </html>
-
