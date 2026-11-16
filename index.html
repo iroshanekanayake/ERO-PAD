@@ -2,6 +2,8 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='13' fill='%230e0f13'/%3E%3Cpath d='M15 14h34v8H24v7h21v8H24v7h25v8H15z' fill='%236fb3ff'/%3E%3C/svg%3E">
+<meta name="theme-color" content="#0e0f13">
 <title>ERO PAD OS v2.24</title>
 <style>
     :root {
@@ -164,6 +166,38 @@
     .file-empty { text-align: center; color: var(--text-dim); font-size: 13px; padding: 20px 0; }
 
     .footer { text-align: center; font-size: 11px; color: var(--text-dim); margin-top: 20px; }
+    .connection-panel {
+        background: linear-gradient(145deg, rgba(30,33,44,.98), rgba(19,21,30,.98));
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 13px 14px;
+        margin: 0 0 18px;
+        box-shadow: 0 6px 18px rgba(0,0,0,.18);
+    }
+    .connection-main { display:flex; align-items:center; gap:10px; }
+    .connection-led { width:11px; height:11px; border-radius:50%; flex:0 0 11px; background:#8b8fa3; box-shadow:0 0 0 4px rgba(139,143,163,.12); }
+    .connection-led.online { background:#33d17a; box-shadow:0 0 0 4px rgba(51,209,122,.13); }
+    .connection-led.waiting { background:#ffb347; box-shadow:0 0 0 4px rgba(255,179,71,.13); }
+    .connection-led.offline { background:#ff5c5c; box-shadow:0 0 0 4px rgba(255,92,92,.13); }
+    .connection-copy { min-width:0; flex:1; }
+    .connection-title { font-size:14px; font-weight:800; letter-spacing:.2px; color:var(--text); }
+    .connection-detail { font-size:11px; line-height:1.45; color:var(--text-dim); margin-top:3px; }
+    .connection-badge { font-size:10px; font-weight:800; letter-spacing:.5px; padding:6px 9px; border-radius:999px; background:#292c37; color:var(--text-dim); white-space:nowrap; }
+    .connection-badge.online { background:rgba(51,209,122,.14); color:#33d17a; }
+    .connection-badge.waiting { background:rgba(255,179,71,.14); color:#ffb347; }
+    .connection-badge.offline { background:rgba(255,92,92,.14); color:#ff7777; }
+    .connection-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:7px; margin-top:12px; }
+    .connection-item { background:rgba(10,12,18,.42); border:1px solid var(--border); border-radius:9px; padding:8px; min-width:0; }
+    .connection-item span { display:block; font-size:9px; color:var(--text-dim); line-height:1.3; }
+    .connection-item strong { display:block; margin-top:4px; font-size:11px; color:var(--text); overflow-wrap:anywhere; }
+    .connection-action { display:none; margin-top:11px; }
+    .connection-action.visible { display:block; }
+    @media (max-width:420px) {
+        .connection-grid { grid-template-columns:1fr; }
+        .connection-item { display:flex; justify-content:space-between; align-items:center; gap:8px; }
+        .connection-item strong { margin-top:0; text-align:right; }
+    }
+
 </style>
 </head>
 <body>
@@ -172,6 +206,25 @@
         <h1>ERO PAD OS</h1>
         <p>v2.24 — Wireless Sound & Settings Center</p>
     </div>
+
+    <section class="connection-panel" id="connectionPanel" aria-live="polite">
+        <div class="connection-main">
+            <span class="connection-led waiting" id="connectionLed"></span>
+            <div class="connection-copy">
+                <div class="connection-title" id="connectionTitle">CHECKING ESP32 CONNECTION...</div>
+                <div class="connection-detail" id="connectionDetail">Checking the board and live control link.</div>
+            </div>
+            <span class="connection-badge waiting" id="connectionBadge">CHECKING</span>
+        </div>
+        <div class="connection-grid">
+            <div class="connection-item"><span>PHONE ↔ BOARD</span><strong id="phoneBoardState">Checking</strong></div>
+            <div class="connection-item"><span>ESP32 API</span><strong id="apiConnectionState">Checking</strong></div>
+            <div class="connection-item"><span>LIVE WEBSOCKET</span><strong id="wsConnectionState">Checking</strong></div>
+        </div>
+        <div class="connection-action" id="connectionAction">
+            <button class="btn btn-blue" type="button" onclick="openEsp32ControlPage()">OPEN ESP32 CONTROL (192.168.4.1)</button>
+        </div>
+    </section>
 
     <div class="tabs">
         <button class="tab-btn active" onclick="showTab('dash')">Dashboard</button>
@@ -383,13 +436,141 @@
         `;
     }
 
-    let ws = new WebSocket(`ws://${location.host}/ws`);
+    const ESP32_HOST = "192.168.4.1";
+    const isEsp32ControlPage = (location.hostname === ESP32_HOST);
+    let ws = null;
+    let wsIsConnected = false;
+    let apiIsConnected = false;
+    let wsReconnectTimer = null;
+    let apiMonitorTimer = null;
+
+    function setConnectionText(id, value) {
+        const el = document.getElementById(id);
+        if (el) el.textContent = value;
+    }
+
+    function updateConnectionPanel() {
+        const led = document.getElementById("connectionLed");
+        const badge = document.getElementById("connectionBadge");
+        const title = document.getElementById("connectionTitle");
+        const detail = document.getElementById("connectionDetail");
+        const action = document.getElementById("connectionAction");
+        if (!led || !badge || !title || !detail) return;
+
+        led.className = "connection-led";
+        badge.className = "connection-badge";
+        if (!isEsp32ControlPage) {
+            led.classList.add("waiting");
+            badge.classList.add("waiting");
+            title.textContent = "GITHUB PAGES PREVIEW";
+            detail.textContent = "This HTTPS page cannot directly control the ESP32 HTTP/Wi-Fi service. Connect to ERO_PAD_WIFI, then open the board's local address.";
+            badge.textContent = "PREVIEW";
+            setConnectionText("phoneBoardState", "Not verified");
+            setConnectionText("apiConnectionState", "Not connected");
+            setConnectionText("wsConnectionState", "Not connected");
+            if (action) action.classList.add("visible");
+            return;
+        }
+
+        if (action) action.classList.remove("visible");
+        setConnectionText("phoneBoardState", apiIsConnected ? "Board reachable" : "Not reachable");
+        setConnectionText("apiConnectionState", apiIsConnected ? "ONLINE" : "OFFLINE");
+        setConnectionText("wsConnectionState", wsIsConnected ? "CONNECTED" : "DISCONNECTED");
+
+        if (apiIsConnected && wsIsConnected) {
+            led.classList.add("online");
+            badge.classList.add("online");
+            title.textContent = "ESP32 BOARD CONNECTED";
+            detail.textContent = "Your phone can reach ERO_PAD_WIFI and the live WebSocket link is active.";
+            badge.textContent = "ONLINE";
+        } else if (apiIsConnected || wsIsConnected) {
+            led.classList.add("waiting");
+            badge.classList.add("waiting");
+            title.textContent = "ESP32 FOUND — CONNECTING LIVE LINK";
+            detail.textContent = "The board is reachable. Waiting for both the API and live WebSocket connection.";
+            badge.textContent = "CONNECTING";
+        } else {
+            led.classList.add("offline");
+            badge.classList.add("offline");
+            title.textContent = "ESP32 BOARD NOT REACHABLE";
+            detail.textContent = "Connect your phone to ERO_PAD_WIFI (password: 12345678) and open http://192.168.4.1/.";
+            badge.textContent = "OFFLINE";
+        }
+    }
+
+    function openEsp32ControlPage() {
+        window.location.href = "http://" + ESP32_HOST + "/";
+    }
+
+    async function checkEsp32Api() {
+        if (!isEsp32ControlPage) return;
+        try {
+            const response = await fetch("/get-current-kit?_=" + Date.now(), {
+                method: "GET",
+                cache: "no-store"
+            });
+            if (!response.ok) throw new Error("HTTP " + response.status);
+            const kitText = (await response.text()).trim();
+            if (!/^\d+$/.test(kitText)) throw new Error("Unexpected board response");
+            apiIsConnected = true;
+        } catch (error) {
+            apiIsConnected = false;
+        }
+        updateConnectionPanel();
+    }
+
+    function connectEsp32WebSocket() {
+        if (!isEsp32ControlPage) return;
+        try {
+            const wsProtocol = location.protocol === "https:" ? "wss:" : "ws:";
+            ws = new WebSocket(wsProtocol + "//" + location.host + "/ws");
+            ws.onopen = function() {
+                wsIsConnected = true;
+                updateConnectionPanel();
+            };
+            ws.onmessage = function(event) {
+                try {
+                    const data = JSON.parse(event.data);
+                    if (data.type === "PAD_HIT" && Number.isInteger(data.pad) && data.pad >= 0 && data.pad < 10) {
+                        padPeaks[data.pad] = data.peak;
+                        padTriggers[data.pad] = 10;
+                    }
+                } catch (error) {
+                    // Ignore malformed live packets; keep the connection alive.
+                }
+            };
+            ws.onerror = function() {
+                wsIsConnected = false;
+                updateConnectionPanel();
+            };
+            ws.onclose = function() {
+                wsIsConnected = false;
+                updateConnectionPanel();
+                if (wsReconnectTimer) clearTimeout(wsReconnectTimer);
+                wsReconnectTimer = setTimeout(connectEsp32WebSocket, 2500);
+            };
+        } catch (error) {
+            wsIsConnected = false;
+            updateConnectionPanel();
+            if (wsReconnectTimer) clearTimeout(wsReconnectTimer);
+            wsReconnectTimer = setTimeout(connectEsp32WebSocket, 2500);
+        }
+    }
+
+    function startConnectionMonitor() {
+        if (!isEsp32ControlPage) {
+            updateConnectionPanel();
+            return;
+        }
+        updateConnectionPanel();
+        checkEsp32Api();
+        connectEsp32WebSocket();
+        if (apiMonitorTimer) clearInterval(apiMonitorTimer);
+        apiMonitorTimer = setInterval(checkEsp32Api, 5000);
+    }
+
     let padPeaks = new Array(10).fill(0);
     let padTriggers = new Array(10).fill(0);
-    ws.onmessage = function(event) {
-        let data = JSON.parse(event.data);
-        if (data.type === "PAD_HIT") { padPeaks[data.pad] = data.peak; padTriggers[data.pad] = 10; }
-    };
     let canvas = document.getElementById('visCanvas');
     let ctx = canvas.getContext('2d');
     function renderVisualizer() {
@@ -502,6 +683,12 @@
     }
 
     window.onload = function() {
+        startConnectionMonitor();
+        if (!isEsp32ControlPage) {
+            // GitHub Pages is a secure HTTPS preview, not the ESP32 control origin.
+            // Browser mixed-content rules prevent its page from calling the ESP32 HTTP/WS API.
+            return;
+        }
         populateSdToneList();
         fetch('/get-chain-mode').then(r => r.json()).then(data => {
             document.getElementById('chainModeToggle').checked = !!data.active;
@@ -771,3 +958,4 @@
 </script>
 </body>
 </html>
+
